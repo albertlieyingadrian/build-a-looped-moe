@@ -1,0 +1,121 @@
+slug: "looped-moe"
+name: "Build a Looped MoE"
+short_name: "Looped MoE"
+release_status: "alpha"
+
+description_md: |-
+  A looped transformer runs the same layers several times. Inkling 2 Mini, an open-weights model released in 2026,
+  goes further: it has no single residual stream. Its layers are grouped into blocks, every sublayer reads its own
+  learned mix of the finished blocks, every pass of its looped core restarts from the same input, and the previous
+  pass reaches the next one only through a gated message. Its feed-forward layers are a mixture of experts.
+
+  You'll start from a plain looped GPT and rebuild each of those ideas at toy scale, in an Inkling-style model (not
+  affiliated with Thinking Machines): blocks and the active block, depth attention over blocks, the output head's
+  own mix, a sigmoid top-k router, a mixture of experts with load balancing, the restart-from-the-prelude loop, the
+  message bank and its gates. Then you'll train it against a plain loop on a puzzle that needs depth, and find out
+  why an ordinary logit lens has trouble reading a model with no single residual stream.
+
+  Everything runs on a laptop CPU, in plain PyTorch.
+
+short_description_md: |-
+  Learn block mixing, mixture-of-experts routing and gated messages between loop passes
+
+completion_percentage: 15
+
+languages:
+  - slug: "python"
+
+marketing:
+  difficulty: hard
+  sample_extension_idea_title: "The real layout"
+  sample_extension_idea_description: "Build Inkling 2 Mini's 24-layer, 48-visit layout at toy width."
+  frequently_asked_questions:
+    - question_markdown: "What exactly will I build?"
+      answer_markdown: |-
+        A command-line program with one command per stage. By the end it holds an Inkling-style looped
+        mixture-of-experts model that gives the same logits as the one-file nanoloop-moe for the same weights, trains
+        it against a plain looped GPT on a chain-following puzzle, and reads every layer visit with three lenses.
+    - question_markdown: "What do I need to know first?"
+      answer_markdown: |-
+        The looped course (build-a-looped-transformer) or an equivalent: attention, a training loop, a prelude /
+        core / coda loop. Stage 01 recaps it in one command.
+
+extensions:
+  - slug: "inkling-layout"
+    name: "The Inkling 2 Mini layout"
+    description_markdown: |-
+      Build the 24-layer, 6-layers-per-block, 48-visit layout at toy width and check your model against the one-file
+      reference.
+
+stages:
+  - slug: "recap"
+    name: "Recap: a plain looped GPT"
+    difficulty: easy
+    marketing_md: |-
+      In this stage, you'll rebuild the plain looped GPT with one residual stream that every later stage changes.
+  - slug: "blocks"
+    name: "Blocks and the active block"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll split the residual stream into finished blocks and the block being built.
+  - slug: "mix"
+    name: "Depth attention over blocks"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll let a sublayer read a learned, softmax-weighted mix of the blocks instead of their sum.
+  - slug: "qkv"
+    name: "Separate mixes for queries, keys and values"
+    difficulty: easy
+    marketing_md: |-
+      In this stage, you'll give attention's queries, keys and values their own mixes of the blocks.
+  - slug: "final-mix"
+    name: "The output head's own mix"
+    difficulty: easy
+    marketing_md: |-
+      In this stage, you'll add `final_input`, the mix the output head reads, and see what it reads at initialisation.
+  - slug: "router"
+    name: "A sigmoid top-k router"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll score experts with a sigmoid, keep the top k, and learn why the balancing bias only picks.
+  - slug: "moe"
+    name: "A mixture of experts"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll stack the experts' weights, run them, and count stored versus active parameters.
+  - slug: "balance"
+    name: "Load balancing without an auxiliary loss"
+    difficulty: easy
+    marketing_md: |-
+      In this stage, you'll nudge the router bias after every step so no expert sits idle.
+  - slug: "loop"
+    name: "Loop it: every pass restarts"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll loop the core, restarting every pass from the prelude's blocks, and prove K does nothing yet.
+  - slug: "bank"
+    name: "The message bank"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll keep the previous pass's core blocks and read four messages per layer from them.
+  - slug: "gate"
+    name: "The gated message"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll merge each message through a low-rank tanh gate that starts closed.
+  - slug: "compare"
+    name: "Looped MoE vs plain loop"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll train the model, a plain loop and a standard transformer at matched active parameters.
+  - slug: "lens"
+    name: "Lenses without a residual stream"
+    difficulty: hard
+    marketing_md: |-
+      In this stage, you'll read every layer visit with a logit lens, a mix lens and the visit's own mix.
+  - slug: "layout"
+    primary_extension_slug: "inkling-layout"
+    name: "The Inkling 2 Mini layout"
+    difficulty: medium
+    marketing_md: |-
+      In this stage, you'll build the 48-visit layout and match the one-file model's logits exactly.
