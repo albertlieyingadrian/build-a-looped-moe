@@ -28,7 +28,26 @@ $ ./your_program.sh compare --n-embd 64 --batch-size 64 --lr 1e-3 --steps 3000 -
 
 `run_all.sh` has the exact command behind the table below.
 
-RESULTS_PLACEHOLDER
+### What we found (seed 0, laptop CPU, 64 wide, 4,000 steps, chains of 1-3 hops)
+
+Accuracy at the `?` positions, mean over 1-3 hops, by the number of core passes K at test time (1,000 puzzles):
+
+| model | stored | active | K = 1 | 2 | 3 | 4 | at its training K: 1 / 2 / 3 hops |
+|---|---|---|---|---|---|---|---|
+| `standard` | 186,432 | 186,432 | **0.69** | 0.65 | 0.63 | 0.61 | 0.89 / 0.61 / 0.58 |
+| `plainloop` | 186,432 | 186,432 | 0.77 | **0.88** | **0.88** | 0.87 | 0.97 / 0.90 / 0.78 |
+| `loopmoe_k1` | 257,984 | 208,832 | **0.58** | 0.58 | 0.58 | 0.58 | 0.63 / 0.55 / 0.55 |
+| `loopmoe` | 257,984 | 208,832 | 0.55 | 0.56 | **0.56** | 0.56 | 0.58 / 0.56 / 0.53 |
+
+(Bold: the K each model was trained at. `standard` above K = 1 means forcing its middle layers to run again.)
+
+At this budget the **plain loop wins clearly** and the looped MoE has not left the 0.55 plateau: its training
+accuracy on 1-hop chains only started to climb (0.55 to 0.77) in the last few hundred of its 4,000 steps, and the
+plain loop broke out around step 2,000. Two things slow it here: every pass restarts from the prelude and its gates
+start closed, so early in training the loop is three copies of a one-pass model; and each sublayer reads a
+normalized average of blocks instead of the full stream. Expect it to need more steps, not to be worse in the end:
+the one-file nanoloop-moe trains these models longer on a GPU, and its README has those numbers. One seed, so treat
+small gaps as noise.
 
 ### What to build
 

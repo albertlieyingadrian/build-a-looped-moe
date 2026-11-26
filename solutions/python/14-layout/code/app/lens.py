@@ -32,7 +32,7 @@ def lens(model, c, loops=None, n=500, seed=0):
     out = {"visits": [], "act_in": [], "mlp_in": [], "mix": []}
     looped = range(model.core_start, model.core_end)
     for (layer, p), r in zip(model.visits(K) + [("out", 0)], rec):
-        out["visits"].append(f"L{layer} p{p + 1}" if layer in looped else f"L{layer}")
+        out["visits"].append("out" if layer == "out" else f"L{layer} p{p + 1}" if layer in looped else f"L{layer}")
         out["act_in"].append(read(r["act_in"]))
         out["mlp_in"].append(read(r["mlp_in"]) if "mlp_in" in r else float("nan"))
         out["mix"].append(read(model.final_input(r["blocks"], r["act_in"])[0]))
